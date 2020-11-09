@@ -24,6 +24,7 @@ default-features = false
 [dependencies.runtime_io]
 version = '2.0.0'
 package = "sp-io"
+path = "./primitives/io"
 default-features=false
 
 [dependencies.metadata]
@@ -34,6 +35,7 @@ default-features=false
 [dependencies.sp-version]
 version = '2.0.0'
 package = "sp-version"
+path = "./primitives/version"
 default-features=false
 
 [dependencies.balances]
@@ -49,6 +51,7 @@ default-features=false
 [dependencies.sp-runtime]
 version = '2.0.0'
 package = "sp-runtime"
+path = "./primitives/runtime"
 default-features=false
 
 [dependencies.support]
@@ -59,6 +62,7 @@ default-features=false
 [dependencies.sp-std]
 version = '2.0.0'
 package = "sp-std"
+path = "./primitives/std"
 default-features = false
 
 [dependencies.sc-rpc-api]
@@ -79,6 +83,7 @@ package = "pallet-contracts"
 
 [dev-dependencies.keyring]
 version = '2.0.0'
+path = "./primitives/keyring"
 package = "sp-keyring"
 
 [dev-dependencies.clap]
