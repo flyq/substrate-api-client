@@ -16,8 +16,10 @@
 ///! Very simple example that shows how to get some simple storage values.
 use clap::{load_yaml, App};
 
-use keyring::AccountKeyring;
+use keyring::{AccountKeyring, Sr25519Keyring};
 use substrate_api_client::{Api, Hash};
+use sp_core::sr25519::Public;
+use hex::FromHex;
 
 fn main() {
     env_logger::init();
@@ -58,6 +60,22 @@ fn main() {
     let signer = AccountKeyring::Alice.pair();
     api.signer = Some(signer);
     println!("[+] Alice's Account Nonce is {}", api.get_nonce().unwrap());
+
+    let public = String::from("8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48");
+    println!("somebody's public: {:?}", public);
+    println!("bob's AccountId32: {:?}", AccountKeyring::Bob.to_account_id());
+    let hex = <[u8;32]>::from_hex(public).unwrap();
+    let who:Public  = Public::from_raw(hex);
+    println!("bob's Keyring: {:?}", Sr25519Keyring::from_public(&who).unwrap());
+
+
+    println!("--------------------------------");
+    println!("bob's seed: {:?}", AccountKeyring::Bob.to_seed());
+    let bob_pair = AccountKeyring::Bob.pair();
+    let clone = bob_pair.clone();
+    println!("bob's pair: {:?}", clone.0);
+    println!("bob's pair's secret: {:?}", clone.0.secret.to_bytes());
+
 }
 
 pub fn get_node_url_from_cli() -> String {

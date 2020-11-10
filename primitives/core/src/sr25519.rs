@@ -65,7 +65,7 @@ pub struct Public(pub [u8; 32]);
 
 /// An Schnorrkel/Ristretto x25519 ("sr25519") key pair.
 #[cfg(feature = "full_crypto")]
-pub struct Pair(Keypair);
+pub struct Pair(pub Keypair);
 
 #[cfg(feature = "full_crypto")]
 impl Clone for Pair {
