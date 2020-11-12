@@ -14,12 +14,15 @@
 */
 
 ///! Very simple example that shows how to get some simple storage values.
+
 use clap::{load_yaml, App};
 
 use keyring::{AccountKeyring, Sr25519Keyring};
 use substrate_api_client::{Api, Hash};
-use sp_core::sr25519::Public;
+use sp_core::sr25519::{Public, Signature};
 use hex::FromHex;
+use schnorrkel::{SecretKey,  signing_context};
+use sha3::Shake128;
 
 fn main() {
     env_logger::init();
@@ -27,6 +30,7 @@ fn main() {
 
     let mut api = Api::new(url);
 
+    /*
     // get some plain storage value
     let result: u128 = api
         .get_storage_value("Balances", "TotalIssuance", None)
@@ -55,27 +59,51 @@ fn main() {
         .or(Some(0))
         .unwrap();
     println!("[+] some double map (1,2) should be 3. Is {:?}", result);
-
+     */
+    
     // get Alice's AccountNonce with api.get_nonce()
     let signer = AccountKeyring::Alice.pair();
     api.signer = Some(signer);
     println!("[+] Alice's Account Nonce is {}", api.get_nonce().unwrap());
-
+     
+    let aliceSigner = AccountKeyring::Alice.pair();
     let public = String::from("8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48");
     println!("somebody's public: {:?}", public);
     println!("bob's AccountId32: {:?}", AccountKeyring::Bob.to_account_id());
     let hex = <[u8;32]>::from_hex(public).unwrap();
     let who:Public  = Public::from_raw(hex);
-    println!("bob's Keyring: {:?}", Sr25519Keyring::from_public(&who).unwrap());
-
+    println!("somebody's Keyring: {:?}", Sr25519Keyring::from_public(&who).unwrap());
 
     println!("--------------------------------");
     println!("bob's seed: {:?}", AccountKeyring::Bob.to_seed());
     let bob_pair = AccountKeyring::Bob.pair();
+
     let clone = bob_pair.clone();
     println!("bob's pair: {:?}", clone.0);
     println!("bob's pair's secret: {:?}", clone.0.secret.to_bytes());
 
+    let u8s = [225, 195, 158, 114, 204, 167, 36, 202, 166, 151, 214, 74, 88, 225, 11, 217, 95, 250, 99, 209, 146, 41, 98, 247, 226, 127, 138, 9, 221, 161, 55, 11, 65, 174, 136, 248, 93, 12, 27, 252, 55, 190, 65, 201, 4, 225, 223, 192, 29, 232, 200, 6, 123, 13, 109, 93, 242, 93, 209, 172, 8, 148, 163, 37];
+    let skey: SecretKey = SecretKey::from_bytes(&u8s[..]).unwrap();
+    let pair = skey.to_keypair();
+
+    println!{"public: {:?}", AccountKeyring::Bob.to_account_id()};
+
+    let msg = [65, 174, 136, 248, 93, 12, 27, 252, 55, 190, 65, 201, 4, 225, 223, 192, 29, 232, 200, 6, 123, 13, 109, 93, 242, 93, 209, 172, 8, 148, 163, 37];
+    println!("msg: {:?}", msg);
+    
+    let ctx: &[u8] = b"substrate";
+    println!("ctx: {:?}", ctx);
+
+    let context = signing_context(ctx);
+//    println!("context: {:?}", context);
+    
+        
+    let s1 = AccountKeyring::Bob.sign(&msg);
+    let s2: Signature = pair.sign(context.bytes(&msg)).into();
+
+    println!("++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    println!("s1: {:?}", s1);
+    println!("s2: {:?}", s2);
 }
 
 pub fn get_node_url_from_cli() -> String {
