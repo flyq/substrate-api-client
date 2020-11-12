@@ -895,15 +895,21 @@ pub trait Pair: CryptoType + Sized + Clone + Send + Sync + 'static {
 	{
 		let re = Regex::new(r"^(?P<phrase>[\d\w ]+)?(?P<path>(//?[^/]+)*)(///(?P<password>.*))?$")
 			.expect("constructed from known-good static value; qed");
+		println!("re: {:?}", re);
 		let cap = re.captures(s).ok_or(SecretStringError::InvalidFormat)?;
-
+		println!("cap: {:?}", cap);
 		let re_junction = Regex::new(r"/(/?[^/]+)")
 			.expect("constructed from known-good static value; qed");
+		println!("re_junction: {:?}", re_junction);
 		let path = re_junction.captures_iter(&cap["path"])
 			.map(|f| DeriveJunction::from(&f[1]));
-
+		println!("path: {:?}", path);
 		let phrase = cap.name("phrase").map(|r| r.as_str()).unwrap_or(DEV_PHRASE);
+		println!("phrase: {:?}", phrase);
+		println!("DEV_PHRASE: {:?}", DEV_PHRASE);
+
 		let password = password_override.or_else(|| cap.name("password").map(|m| m.as_str()));
+		println!("password: {:?}", password);
 
 		let (root, seed) = if phrase.starts_with("0x") {
 			hex::decode(&phrase[2..]).ok()
@@ -911,6 +917,7 @@ pub trait Pair: CryptoType + Sized + Clone + Send + Sync + 'static {
 					let mut seed = Self::Seed::default();
 					if seed.as_ref().len() == seed_vec.len() {
 						seed.as_mut().copy_from_slice(&seed_vec);
+						println!("seed: {:?}", seed);
 						Some((Self::from_seed(&seed), seed))
 					} else {
 						None
